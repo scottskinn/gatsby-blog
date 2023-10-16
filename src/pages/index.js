@@ -1,10 +1,20 @@
 import * as React from "react"
 import { graphql, Link, useStaticQuery } from "gatsby"
 import { StaticImage } from "gatsby-plugin-image"
+import styled from "styled-components"
 
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import * as styles from "../components/index.module.css"
+
+const BlogLink = styled(Link)`
+  text-decoration: none;
+`
+
+const BlogTitle = styled.h3`
+  margin-bottom: 20px;
+  color: blue;
+`
 
 const links = [
   {
@@ -74,15 +84,17 @@ export default ({ data }) => {
         </h1>
         <h4>{data.allMarkdownRemark.totalCount}</h4>
         {
-          data.allMarkdownRemark.edges.map(({node}) => (
+          data.allMarkdownRemark.edges.map(({ node }) => (
             <div key={node.id}>
-              <span>{node.frontmatter.title} - {node.frontmatter.date}</span>
+              <BlogLink to={node.fields.slug}>
+                <BlogTitle>{node.frontmatter.title} - {node.frontmatter.date}</BlogTitle>
+              </BlogLink>
               <p>{node.excerpt}</p>
             </div>
           ))
         }
-       </div>
-      
+      </div>
+
       {moreLinks.map((link, i) => (
         <React.Fragment key={link.url}>
           <a href={`${link.url}${utmParameters}`}>{link.text}</a>
@@ -103,7 +115,7 @@ export const Head = () => <Seo title="Home" />
 
 export const query = graphql`
 query {
-  allMarkdownRemark {
+  allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {
     totalCount
     edges {
       node {
@@ -112,6 +124,9 @@ query {
           date
           description
           title
+        }
+        fields {
+          slug
         }
         excerpt
       }
