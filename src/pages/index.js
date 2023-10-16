@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link } from "gatsby"
+import { graphql, Link, useStaticQuery } from "gatsby"
 import { StaticImage } from "gatsby-plugin-image"
 
 import Layout from "../components/layout"
@@ -47,77 +47,51 @@ const samplePageLinks = [
 ]
 
 const moreLinks = [
-  { text: "Join us on Discord", url: "https://gatsby.dev/discord" },
+  { text: "Find me on LinkedIn", url: "https://www.linkedin.com/in/scott-skinn/" },
   {
-    text: "Documentation",
-    url: "https://gatsbyjs.com/docs/",
+    text: "My Github",
+    url: "https://github.com/scottskinn",
   },
-  {
-    text: "Starters",
-    url: "https://gatsbyjs.com/starters/",
-  },
-  {
-    text: "Showcase",
-    url: "https://gatsbyjs.com/showcase/",
-  },
-  {
-    text: "Contributing",
-    url: "https://www.gatsbyjs.com/contributing/",
-  },
-  { text: "Issues", url: "https://github.com/gatsbyjs/gatsby/issues" },
 ]
 
 const utmParameters = `?utm_source=starter&utm_medium=start-page&utm_campaign=default-starter`
 
-const IndexPage = () => (
-  <Layout>
-    <div className={styles.textCenter}>
-      <StaticImage
-        src="../images/example.png"
-        loading="eager"
-        width={64}
-        quality={95}
-        formats={["auto", "webp", "avif"]}
-        alt=""
-        style={{ marginBottom: `var(--space-3)` }}
-      />
-      <h1>
-        Welcome to <b>Gatsby!</b>
-      </h1>
-      <p className={styles.intro}>
-        <b>Example pages:</b>{" "}
-        {samplePageLinks.map((link, i) => (
-          <React.Fragment key={link.url}>
-            <Link to={link.url}>{link.text}</Link>
-            {i !== samplePageLinks.length - 1 && <> · </>}
-          </React.Fragment>
-        ))}
-        <br />
-        Edit <code>src/pages/index.js</code> to update this page.
-      </p>
-    </div>
-    <ul className={styles.list}>
-      {links.map(link => (
-        <li key={link.url} className={styles.listItem}>
-          <a
-            className={styles.listItemLink}
-            href={`${link.url}${utmParameters}`}
-          >
-            {link.text} ↗
-          </a>
-          <p className={styles.listItemDescription}>{link.description}</p>
-        </li>
+export default ({ data }) => {
+  return (
+    <Layout>
+      <div className={styles.textCenter}>
+        <StaticImage
+          src="../images/example.png"
+          loading="eager"
+          width={64}
+          quality={95}
+          formats={["auto", "webp", "avif"]}
+          alt=""
+          style={{ marginBottom: `var(--space-3)` }}
+        />
+        <h1>
+          Welcome to <b>Scott's Blog!</b>
+        </h1>
+        <h4>{data.allMarkdownRemark.totalCount}</h4>
+        {
+          data.allMarkdownRemark.edges.map(({node}) => (
+            <div key={node.id}>
+              <span>{node.frontmatter.title} - {node.frontmatter.date}</span>
+              <p>{node.excerpt}</p>
+            </div>
+          ))
+        }
+       </div>
+      
+      {moreLinks.map((link, i) => (
+        <React.Fragment key={link.url}>
+          <a href={`${link.url}${utmParameters}`}>{link.text}</a>
+          {i !== moreLinks.length - 1 && <> · </>}
+        </React.Fragment>
       ))}
-    </ul>
-    {moreLinks.map((link, i) => (
-      <React.Fragment key={link.url}>
-        <a href={`${link.url}${utmParameters}`}>{link.text}</a>
-        {i !== moreLinks.length - 1 && <> · </>}
-      </React.Fragment>
-    ))}
-  </Layout>
-)
-
+    </Layout>
+  )
+}
 /**
  * Head export to define metadata for the page
  *
@@ -125,4 +99,23 @@ const IndexPage = () => (
  */
 export const Head = () => <Seo title="Home" />
 
-export default IndexPage
+// export default IndexPage
+
+export const query = graphql`
+query {
+  allMarkdownRemark {
+    totalCount
+    edges {
+      node {
+        id
+        frontmatter {
+          date
+          description
+          title
+        }
+        excerpt
+      }
+    }
+  }
+}
+`
